@@ -1,21 +1,33 @@
 <?php
+// Create a new DOMDocument
+$dom = new DOMDocument();
 
-$response = @file_get_contents( "https://www.instagram.com/uefrance/?__a=1" );
+// Load the HTML content from the URL
+$url = "https://www.instagram.com/uefrance/";
+$html = file_get_contents($url);
 
-if ( $response !== false ) {
-  $data = json_decode( $response, true );
+// Load the HTML content into the DOMDocument
+@$dom->loadHTML($html);
 
-  if ( $data !== null ) {
-    $follower  = $data['graphql']['user']['edge_followed_by']['count'];
+// Use XPath to find the element with the class "_ac2a"
+$xpath = new DOMXPath($dom);
+$elements = $xpath->query('//span[@class="_ac2a"]');
 
-    header('Access-Control-Allow-Origin: *');
-    header('Content-Type: application/json');
-    echo json_encode(['number' => $follower], JSON_FORCE_OBJECT);
-  }
-} else {
-  header('Access-Control-Allow-Origin: *');
-  header('Content-Type: application/json');
-  echo json_encode(['number' => 0, 'error' => 'Username not found'], JSON_FORCE_OBJECT);
+// Initialize an array to store the results
+$results = [];
+
+// Loop through the found elements
+foreach ($elements as $element) {
+    // Get the "title" attribute
+    $title = $element->getAttribute('title');
+    
+    // Add the title to the results array
+    $results[] = $title;
 }
 
+// Encode the results array as JSON
+$jsonResult = json_encode($results);
+
+// Output the JSON object
+echo $jsonResult;
 ?>
